@@ -97,7 +97,7 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
 .tx-table th { text-align: left; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 10px; border-bottom: 1px solid var(--line); }
 .tx-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
 .tx-table .r { text-align: right; }
-.tx-table tfoot td { font-weight: 700; border-bottom: 0; padding-top: 8px; padding-bottom: 8px; }
+.tx-table tfoot td { white-space: nowrap; font-weight: 700; border-bottom: 0; padding-top: 8px; padding-bottom: 8px; }
 .tx-table tfoot .saldo td { border-top: 2px solid var(--line); font-size: 15px; }
 .debit { color: var(--green); }
 .credit { color: var(--red); }
@@ -107,6 +107,7 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
 .row-actions { display: inline-flex; gap: 4px; }
 .row-actions button { border: 0; background: transparent; cursor: pointer; color: var(--muted); padding: 6px 8px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 700; }
 .row-actions button:hover { background: #f1f5f9; color: var(--ink); }
+.nota-m { display: none; margin-top: 4px; }
 .empty { text-align: center; color: var(--muted); padding: 22px 10px !important; }
 
 /* Signers */
@@ -145,4 +146,10 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
   .topnav { gap: 12px; font-size: 13px; }
   .topnav a:nth-child(1) { display: none; }
   .card { padding: 16px; }
+  .tx-table { min-width: 0; font-size: 13px; }
+  .tx-table th, .tx-table td { padding: 8px 4px; }
+  .tx-table th:nth-child(3), .tx-table td:nth-child(3) { display: none; }
+  .nota-m { display: block; }
+  .row-actions { flex-direction: column; gap: 0; }
+  .row-actions button { padding: 4px 6px; }
 }

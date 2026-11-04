@@ -110,10 +110,11 @@ function renderEntries() {
   } else {
     body.innerHTML = state.entries.map((e, i) => {
       const n = e.images.length;
+      const nota = n ? `<span class="badge">${n} nota</span>` : e.type === 'debit' ? '<span class="muted">—</span>' : '<span class="badge none">Belum ada nota</span>';
       return `<tr>
         <td>${i + 1}</td>
-        <td>${escapeHtml(e.desc)}</td>
-        <td>${n ? `<span class="badge">${n} nota</span>` : e.type === 'debit' ? '<span class="muted">—</span>' : '<span class="badge none">Belum ada</span>'}</td>
+        <td>${escapeHtml(e.desc)}<div class="nota-m">${nota}</div></td>
+        <td>${nota}</td>
         <td class="r amount ${e.type}">${e.type === 'debit' ? '+' : '-'} ${rupiah(e.amount, false)}</td>
         <td class="r"><span class="row-actions">
           <button type="button" data-edit="${e.id}">Ubah</button>
