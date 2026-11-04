@@ -48,7 +48,7 @@ Issue dan pull request sangat diterima. Mohon jaga prinsip utamanya: **tidak ada
 
 ## Kredit
 
-- Foto latar halaman: diambil dari Pinterest (hak cipta milik fotografernya).
+- Foto latar halaman: [Adika Budiman](https://www.pexels.com/photo/a-corridor-with-windows-and-doors-17224861/) dari Pexels ([Lisensi Pexels](https://www.pexels.com/license/)).
 
 ## Lisensi
 
