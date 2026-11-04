@@ -22,7 +22,7 @@ a { color: var(--blue); }
 
 /* Header & hero (sama dengan LPJ Maker versi sekolah) */
 .hero { position: relative; overflow: hidden; color: #fff; background: var(--navy); padding-bottom: 72px; }
-.hero::before { content: ""; position: absolute; inset: 0; background: url("../img/latar-koridor.jpg") center 70% / cover no-repeat; }
+.hero::before { content: ""; position: absolute; inset: 0; background: url("../img/latar-koridor.jpg") center top / cover no-repeat; }
 .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 37, 79, .82) 0%, rgba(8, 37, 79, .7) 50%, rgba(8, 37, 79, .6) 100%); }
 .hero > * { z-index: 1; }
 .hero > * { position: relative; }
