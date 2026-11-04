@@ -10,6 +10,7 @@ const blank = () => ({
   title: '', org: '', city: '', date: todayIso(), logo: null,
   entries: [],
   signers: [{ id: uid(), role: 'Penanggung Jawab', name: '', sig: null }],
+  step: 1,
 });
 
 let state = blank();
@@ -239,8 +240,52 @@ $('#sig-save').addEventListener('click', (e) => {
 function updateDownloadState() {
   const ready = state.title.trim() && state.entries.length;
   $('#btn-pdf').disabled = !ready;
-  $('#dl-hint').textContent = ready ? 'PDF dibuat di perangkatmu, tidak diunggah ke mana pun.' : 'Lengkapi judul dan minimal satu transaksi.';
+  $('#dl-hint').textContent = ready ? 'PDF dibuat di perangkatmu, tidak diunggah ke mana pun.' : 'Lengkapi judul dan minimal satu transaksi dulu.';
+  renderSummary();
 }
+
+// ---------- Langkah (wizard) ----------
+function renderSummary() {
+  const d = state.entries.filter((e) => e.type === 'debit').reduce((a, e) => a + e.amount, 0);
+  const c = state.entries.filter((e) => e.type === 'credit').reduce((a, e) => a + e.amount, 0);
+  const nota = state.entries.reduce((a, e) => a + e.images.length, 0);
+  const ttd = state.signers.filter((x) => x.sig).length;
+  const rows = [
+    ['Judul', escapeHtml(state.title.trim() || '—')],
+    ['Transaksi', `${state.entries.length} transaksi, ${nota} nota`],
+    ['Saldo akhir', rupiah(d - c)],
+    ['Tanda tangan', `${ttd} dari ${state.signers.length} penanda tangan`],
+  ];
+  $('#summary').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+}
+
+function showStep(n, { scroll = true } = {}) {
+  if (n > 1 && !state.title.trim()) {
+    n = 1; toast('Isi judul laporan dulu.'); $('#f-title').focus();
+  }
+  state.step = n;
+  document.querySelectorAll('.pane').forEach((p) => (p.hidden = Number(p.dataset.step) !== n));
+  document.querySelectorAll('.stepper li').forEach((li, i) => {
+    li.classList.toggle('active', i + 1 === n);
+    li.classList.toggle('done', i + 1 < n);
+    li.querySelector('button').setAttribute('aria-current', i + 1 === n ? 'step' : 'false');
+  });
+  if (n === 4) renderSummary();
+  if (scroll) $('#mulai').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  persist();
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-next], [data-goto]');
+  if (b) showStep(Number(b.dataset.next || b.dataset.goto));
+});
+$('#toggle-detail').addEventListener('click', () => {
+  const open = $('#detail').hidden;
+  $('#detail').hidden = !open;
+  $('#toggle-detail').setAttribute('aria-expanded', String(open));
+  $('#toggle-detail').textContent = open ? '− Sembunyikan detail' : '+ Tambah detail (organisasi, kota, logo)';
+});
+$('#f-title').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); showStep(2); } });
+
 $('#btn-pdf').addEventListener('click', async () => {
   const btn = $('#btn-pdf');
   btn.disabled = true; btn.textContent = 'Membuat PDF...';
@@ -261,7 +306,14 @@ $('#btn-reset').addEventListener('click', async () => {
   toast('Siap untuk LPJ baru.');
 });
 
-function renderAll() { renderInfo(); renderEntries(); renderSigners(); updateDownloadState(); }
+function renderAll() {
+  renderInfo(); renderEntries(); renderSigners(); updateDownloadState();
+  const hasDetail = Boolean(state.org || state.city || state.logo);
+  $('#detail').hidden = !hasDetail;
+  $('#toggle-detail').setAttribute('aria-expanded', String(hasDetail));
+  $('#toggle-detail').textContent = hasDetail ? '− Sembunyikan detail' : '+ Tambah detail (organisasi, kota, logo)';
+  showStep(state.step || 1, { scroll: false });
+}
 
 (async () => {
   const saved = await loadDraft();
