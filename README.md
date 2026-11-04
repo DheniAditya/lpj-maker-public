@@ -46,6 +46,10 @@ Situs ini statis, jadi bisa dihosting gratis di **GitHub Pages** (Settings → P
 
 Issue dan pull request sangat diterima. Mohon jaga prinsip utamanya: **tidak ada data pengguna yang dikirim ke server**.
 
+## Kredit
+
+- Foto latar halaman: diambil dari Pinterest (hak cipta milik fotografernya).
+
 ## Lisensi
 
 [MIT](LICENSE) © 2026 Deni Aditya Warman. Menggunakan [jsPDF](https://github.com/parallax/jsPDF) (MIT).

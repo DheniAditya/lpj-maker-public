@@ -22,7 +22,7 @@ a { color: var(--blue); }
 
 /* Header & hero (sama dengan LPJ Maker versi sekolah) */
 .hero { position: relative; overflow: hidden; color: #fff; background: var(--navy); padding-bottom: 72px; }
-.hero::before { content: ""; position: absolute; inset: 0; background: url("../img/latar.jpg") center / cover no-repeat; transform: scaleX(-1); }
+.hero::before { content: ""; position: absolute; inset: 0; background: url("../img/latar.jpg") center 60% / cover no-repeat; }
 .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 37, 79, .82) 0%, rgba(8, 37, 79, .7) 50%, rgba(8, 37, 79, .6) 100%); }
 .hero > * { z-index: 1; }
 .hero > * { position: relative; }
@@ -162,3 +162,6 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
   .row-actions { flex-direction: column; gap: 0; }
   .row-actions button { padding: 4px 6px; }
 }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.photo-credit { margin: 4px 0 0; font-size: 12px; }
