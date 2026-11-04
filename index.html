@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>LPJ Maker — Buat LPJ dari nota sampai PDF, gratis tanpa akun</title>
+  <meta name="description" content="Buat Laporan Pertanggungjawaban (LPJ) yang rapi: catat transaksi, lampirkan foto nota, tanda tangan, lalu unduh PDF. Gratis, tanpa akun, semua diproses di perangkatmu.">
+  <meta name="theme-color" content="#0b2246">
+  <link rel="icon" href="assets/img/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./"><img src="assets/img/icon.svg" alt="" width="28" height="28"><span>LPJ <b>Maker</b></span></a>
+      <nav class="topnav">
+        <a href="#cara-pakai">Cara Pakai</a>
+        <a href="#privasi">Privasi</a>
+        <a href="https://github.com/DheniAditya/lpj-maker-public" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="kicker">Gratis · Tanpa akun · Open source</p>
+      <h1>Buat LPJ yang rapi, dari nota sampai PDF</h1>
+      <p class="lead">Catat transaksi, lampirkan foto nota, tanda tangan, lalu unduh PDF siap cetak. Semua diproses di perangkatmu — tidak ada yang dikirim ke server.</p>
+    </div>
+  </section>
+
+  <main class="wrap main">
+    <!-- 1. Info laporan -->
+    <section class="card" aria-labelledby="h-info">
+      <div class="card-head">
+        <span class="step">1</span>
+        <div><h2 id="h-info">Info Laporan</h2><p class="muted">Muncul di bagian atas PDF.</p></div>
+      </div>
+      <div class="grid2">
+        <label class="field full">Judul Laporan
+          <input id="f-title" type="text" placeholder="Contoh: LPJ Lomba 17 Agustus 2026" maxlength="150">
+        </label>
+        <label class="field"><span>Nama Organisasi / Instansi <span class="opt">(opsional)</span></span>
+          <input id="f-org" type="text" placeholder="Contoh: Karang Taruna RW 05" maxlength="120">
+        </label>
+        <label class="field"><span>Kota / Tempat <span class="opt">(opsional)</span></span>
+          <input id="f-city" type="text" placeholder="Contoh: Surakarta" maxlength="60">
+        </label>
+        <label class="field">Tanggal Laporan
+          <input id="f-date" type="date">
+        </label>
+        <div class="field"><span>Logo <span class="opt">(opsional)</span></span>
+          <div class="logo-row">
+            <img id="logo-preview" alt="" hidden>
+            <label class="btn btn-light btn-sm">Pilih logo<input id="f-logo" type="file" accept="image/*" hidden></label>
+            <button id="logo-remove" type="button" class="btn btn-ghost btn-sm" hidden>Hapus</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Transaksi -->
+    <section class="card" aria-labelledby="h-tx">
+      <div class="card-head">
+        <span class="step">2</span>
+        <div><h2 id="h-tx">Transaksi</h2><p class="muted">Debit = uang masuk, Kredit = uang keluar.</p></div>
+      </div>
+
+      <form id="tx-form" class="tx-form" autocomplete="off">
+        <div class="seg" role="radiogroup" aria-label="Jenis transaksi">
+          <label><input type="radio" name="type" value="debit"><span>Debit <small>Masuk</small></span></label>
+          <label><input type="radio" name="type" value="credit" checked><span>Kredit <small>Keluar</small></span></label>
+        </div>
+        <label class="field">Keterangan
+          <input id="tx-desc" type="text" placeholder="Contoh: Beli konsumsi rapat" maxlength="200" required>
+        </label>
+        <label class="field">Nominal (Rp)
+          <input id="tx-amount" type="text" inputmode="numeric" placeholder="0" required>
+        </label>
+        <div class="field full"><span>Bukti Transaksi (nota) <span class="opt">(bisa lebih dari satu)</span></span>
+          <div class="picker">
+            <label class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>Upload<input id="tx-files" type="file" accept="image/*" multiple hidden></label>
+            <label class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.83 6.18A2.31 2.31 0 0 1 5.19 7.23c-.38.05-.76.11-1.13.18C3 7.58 2.25 8.51 2.25 9.57V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.57c0-1.06-.75-1.99-1.8-2.16a48 48 0 0 0-1.14-.18 2.31 2.31 0 0 1-1.64-1.05l-.82-1.32a2.19 2.19 0 0 0-1.74-1.04 48.8 48.8 0 0 0-5.23 0 2.19 2.19 0 0 0-1.74 1.04l-.82 1.32ZM16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg>Kamera<input id="tx-camera" type="file" accept="image/*" capture="environment" hidden></label>
+          </div>
+          <div id="tx-thumbs" class="thumbs"></div>
+        </div>
+        <div class="form-actions">
+          <button id="tx-cancel" type="button" class="btn btn-ghost" hidden>Batal</button>
+          <button id="tx-submit" type="submit" class="btn btn-primary">Simpan Transaksi</button>
+        </div>
+      </form>
+
+      <div class="table-wrap">
+        <table class="tx-table">
+          <thead><tr><th>No</th><th>Keterangan</th><th>Nota</th><th class="r">Nominal</th><th class="r">Aksi</th></tr></thead>
+          <tbody id="tx-body"></tbody>
+          <tfoot>
+            <tr><td colspan="3">Total Debit</td><td class="r debit" id="sum-debit">Rp 0</td><td></td></tr>
+            <tr><td colspan="3">Total Kredit</td><td class="r credit" id="sum-credit">Rp 0</td><td></td></tr>
+            <tr class="saldo"><td colspan="3">Saldo Akhir</td><td class="r" id="sum-balance">Rp 0</td><td></td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. Tanda tangan -->
+    <section class="card" aria-labelledby="h-sign">
+      <div class="card-head">
+        <span class="step">3</span>
+        <div><h2 id="h-sign">Tanda Tangan</h2><p class="muted">Bisa lebih dari satu, misalnya Ketua dan Bendahara.</p></div>
+      </div>
+      <div id="signers" class="signers"></div>
+      <button id="add-signer" type="button" class="btn btn-light">+ Tambah Penanda Tangan</button>
+    </section>
+
+    <!-- 4. Download -->
+    <section class="card cta" aria-labelledby="h-dl">
+      <div class="card-head">
+        <span class="step">4</span>
+        <div><h2 id="h-dl">Download PDF</h2><p class="muted" id="dl-hint">Lengkapi judul dan minimal satu transaksi.</p></div>
+      </div>
+      <div class="cta-actions">
+        <button id="btn-pdf" type="button" class="btn btn-primary btn-lg">Download PDF</button>
+        <button id="btn-reset" type="button" class="btn btn-ghost">Mulai LPJ Baru</button>
+      </div>
+      <p class="saved muted" id="saved-status" aria-live="polite"></p>
+    </section>
+
+    <section id="cara-pakai" class="info">
+      <h2>Cara Pakai</h2>
+      <ol>
+        <li><b>Isi Info Laporan</b>: judul, nama organisasi, dan logo bila ada.</li>
+        <li><b>Tambah Transaksi</b>: pilih Debit atau Kredit, isi keterangan dan nominal, lampirkan foto nota dari galeri atau kamera.</li>
+        <li><b>Tanda Tangan</b>: tulis langsung di layar atau unggah gambar tanda tangan. Latar putih otomatis dibuat transparan.</li>
+        <li><b>Download PDF</b>: tabel bernomor, total, saldo akhir, tanda tangan, dan lampiran nota.</li>
+      </ol>
+    </section>
+
+    <section id="privasi" class="info">
+      <h2>Privasi</h2>
+      <p>LPJ Maker berjalan sepenuhnya di browser. Foto nota, tanda tangan, dan data transaksi <b>tidak pernah dikirim ke server</b>. Draf disimpan di perangkat ini saja agar tidak hilang saat halaman tertutup, dan bisa dihapus kapan saja lewat tombol <i>Mulai LPJ Baru</i>.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>LPJ Maker · Open source (MIT) · <a href="https://github.com/DheniAditya/lpj-maker-public" target="_blank" rel="noopener">Kode di GitHub</a></p>
+    </div>
+  </footer>
+
+  <!-- Dialog tanda tangan -->
+  <dialog id="sig-dialog" class="dialog">
+    <form method="dialog" class="dialog-inner">
+      <div class="dialog-head">
+        <h3>Tanda Tangan</h3>
+        <button class="icon-btn" value="cancel" aria-label="Tutup">✕</button>
+      </div>
+      <div class="seg seg-sm" role="tablist">
+        <label><input type="radio" name="sigmode" value="draw" checked><span>Tulis</span></label>
+        <label><input type="radio" name="sigmode" value="image"><span>Gambar</span></label>
+      </div>
+      <div id="sig-draw">
+        <canvas id="sig-canvas" class="sig-canvas" width="600" height="260"></canvas>
+        <div class="row-between"><span class="muted small">Tulis tanda tangan di kotak di atas.</span><button id="sig-clear" type="button" class="btn btn-ghost btn-sm">Bersihkan</button></div>
+      </div>
+      <div id="sig-image" hidden>
+        <label class="drop drop-wide">Pilih gambar tanda tangan<input id="sig-file" type="file" accept="image/*" hidden></label>
+        <img id="sig-file-preview" class="sig-file-preview" alt="" hidden>
+        <p class="muted small">Foto tanda tangan di kertas putih juga bisa — latar putih dibuat transparan.</p>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" value="cancel">Batal</button>
+        <button id="sig-save" class="btn btn-primary" value="save">Simpan Tanda Tangan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="assets/vendor/jspdf.umd.min.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
