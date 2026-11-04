@@ -11,7 +11,7 @@
   --green: #059669;
   --red: #e11d48;
   --radius: 16px;
-  font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: var(--ink);
 }
 * { box-sizing: border-box; }
@@ -20,21 +20,28 @@ body { margin: 0; background: var(--bg); line-height: 1.5; }
 a { color: var(--blue); }
 .wrap { width: 100%; max-width: 980px; margin: 0 auto; padding: 0 16px; }
 
-/* Header & hero */
-.topbar { background: var(--navy); color: #fff; }
-.topbar-inner { display: flex; align-items: center; justify-content: space-between; min-height: 60px; gap: 12px; }
-.brand { display: flex; align-items: center; gap: 8px; color: #fff; text-decoration: none; font-size: 18px; letter-spacing: .02em; }
-.brand b { font-weight: 800; }
-.topnav { display: flex; gap: 18px; font-size: 14px; font-weight: 600; }
+/* Header & hero (sama dengan LPJ Maker versi sekolah) */
+.hero { position: relative; overflow: hidden; color: #fff; background: var(--navy); padding-bottom: 72px; }
+.hero::before { content: ""; position: absolute; inset: 0; background: url("../img/latar.jpg") center / cover no-repeat; transform: scaleX(-1); }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 37, 79, .82) 0%, rgba(8, 37, 79, .7) 50%, rgba(8, 37, 79, .6) 100%); }
+.hero > * { z-index: 1; }
+.hero > * { position: relative; }
+.topbar-inner { display: flex; align-items: center; justify-content: space-between; min-height: 72px; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 8px; color: #fff; text-decoration: none; }
+.brand img { height: 32px; width: auto; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .25)); }
+.brand span { font-size: 20px; font-weight: 300; letter-spacing: .025em; }
+.topnav { display: flex; gap: 24px; font-size: 14px; font-weight: 600; }
 .topnav a { color: rgba(255, 255, 255, .85); text-decoration: none; }
 .topnav a:hover { color: #fff; }
-.hero { background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 28px 0 64px; }
-.kicker { margin: 0; color: var(--sky); font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
-.hero h1 { margin: 10px 0 0; font-size: clamp(26px, 5vw, 40px); line-height: 1.15; font-weight: 800; }
-.lead { margin: 12px 0 0; max-width: 620px; color: rgba(255, 255, 255, .88); font-size: 16px; }
+.hero-body { padding-top: 24px; }
+.kicker { margin: 0 0 12px; color: var(--sky); font-size: 12px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; }
+.tagline { margin: 0; font-size: clamp(18px, 3.2vw, 22px); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .9); }
+.lead { margin: 20px 0 0; max-width: 28rem; color: rgba(255, 255, 255, .85); font-size: clamp(16px, 2.2vw, 18px); line-height: 1.625; }
+.btn-glass { display: inline-flex; align-items: center; min-height: 44px; margin-top: 32px; padding: 12px 28px; border-radius: 12px; background: rgba(255, 255, 255, .15); border: 1px solid rgba(255, 255, 255, .25); color: #fff; font-weight: 700; text-decoration: none; transition: background .15s; }
+.btn-glass:hover { background: rgba(255, 255, 255, .25); }
 
 /* Cards */
-.main { margin-top: -40px; display: flex; flex-direction: column; gap: 18px; padding-bottom: 40px; }
+.main { margin-top: -40px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 18px; padding-bottom: 40px; }
 .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: 0 10px 30px -18px rgba(15, 23, 42, .35); }
 .card-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
 .card-head h2 { margin: 0; font-size: 18px; }
@@ -142,6 +149,8 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
 .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--navy); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 25px -10px rgba(0, 0, 0, .5); z-index: 60; max-width: calc(100% - 32px); }
 
 @media (max-width: 640px) {
+  .lead, .btn-glass { display: none; }
+  .hero { padding-bottom: 60px; }
   .grid2, .tx-form { grid-template-columns: 1fr; }
   .topnav { gap: 12px; font-size: 13px; }
   .topnav a:nth-child(1) { display: none; }
