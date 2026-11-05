@@ -136,43 +136,37 @@ export async function buildPdf(state) {
 
   // Terbilang + catatan
   const terb = `${saldo < 0 ? 'Minus ' : ''}${terbilang(Math.abs(saldo))} Rupiah`;
-  const note = saldo < 0 ? `Catatan: pengeluaran melebihi dana masuk sebesar Rp${num(saldo)}.`
-    : saldo > 0 ? `Catatan: sisa dana sebesar Rp${num(saldo)}.` : 'Catatan: dana habis terpakai.';
   font('Plex', 'italic', 8.5);
   const terbLines = doc.splitTextToSize(terb, CW - 30);
-  const boxH = 6 + terbLines.length * 4.2 + 5;
+  const boxH = 4.6 + terbLines.length * 4.2 + 3;
   doc.setFillColor(...BOX); doc.rect(M, y, CW, boxH, 'F');
   font('Plex', 'bold', 8.5); color(INK); text('Terbilang:', M + 4, y + 5.6);
   const lw = doc.getTextWidth('Terbilang:') + 1.6;
   font('Plex', 'italic', 8.5); text(terbLines, M + 4 + lw, y + 5.6);
-  font('Plex', 'normal', 8.5); color(GRAY); text(note, M + 4, y + 5.6 + terbLines.length * 4.2);
   y += boxH + 14;
 
   // ---------- Tanda tangan ----------
-  // Penanda tangan pertama = pembuat laporan (kanan), yang lain = pemeriksa (kiri).
-  const [maker, ...others] = state.signers;
-  const slots = [];
-  const checkers = others.length ? others : [{ role: '', name: '', sig: null, empty: true }];
-  checkers.forEach((s, i) => slots.push({ ...s, label: i === 0 ? 'Diperiksa oleh,' : 'Mengetahui,' }));
-  if (maker) slots.push({ ...maker, label: `Dibuat oleh, ${tanggalIndo(state.date)}` });
-  const colW = (CW - 14) / 2, rowH = 46;
-  // Urutan tampil: baris pertama [pemeriksa, pembuat], sisanya mengikuti.
-  const order = [slots[0], slots[slots.length - 1], ...slots.slice(1, -1)].filter(Boolean);
-  order.forEach((s, i) => {
-    const col = i % 2, row = Math.floor(i / 2);
-    if (col === 0 && y + row * rowH + rowH > H - 18) { doc.addPage(); y = 24 - row * rowH; }
-    const x = M + col * (colW + 14), yy = y + row * rowH;
-    font('Plex', 'normal', 9.5); color(INK); text(s.label, x, yy);
-    if (s.sig) {
-      const maxW = colW * 0.6, maxH = 20;
-      let w = maxW, h = (s.sig.h / s.sig.w) * w;
-      if (h > maxH) { h = maxH; w = (s.sig.w / s.sig.h) * h; }
-      doc.addImage(s.sig.src, 'PNG', x + 2, yy + 4 + (maxH - h), w, h);
-    }
-    rule(yy + 26, 0.25, x, x + colW);
-    font('Plex', 'bold', 9.5); color(INK); text(s.name || '', x, yy + 31.5);
-    font('Plex', 'normal', 9); color(GRAY); text(s.role || '', x, yy + 36.5);
-  });
+  // Hanya kolom yang diisi pengguna: 1 kolom untuk 1 penanda tangan, 2 untuk 2, dst.
+  const signers = state.signers.filter((x) => x.name?.trim() || x.role?.trim() || x.sig);
+  if (signers.length) {
+    const n = signers.length, perRow = n === 4 ? 2 : Math.min(n, 3);
+    const gapX = 12, colW = n === 1 ? (CW - gapX) / 2 : (CW - gapX * (perRow - 1)) / perRow, rowH = 40;
+    signers.forEach((sg, i) => {
+      const col = i % perRow, row = Math.floor(i / perRow);
+      if (col === 0 && y + row * rowH + rowH > H - 18) { doc.addPage(); y = 24 - row * rowH; }
+      const x = n === 1 ? W - M - colW : M + col * (colW + gapX);
+      const yy = y + row * rowH;
+      if (sg.sig) {
+        const maxW = colW * 0.7, maxH = 20;
+        let w = maxW, h = (sg.sig.h / sg.sig.w) * w;
+        if (h > maxH) { h = maxH; w = (sg.sig.w / sg.sig.h) * h; }
+        doc.addImage(sg.sig.src, 'PNG', x + 2, yy + (maxH - h), w, h);
+      }
+      rule(yy + 22, 0.25, x, x + colW);
+      font('Plex', 'bold', 9.5); color(INK); text(sg.name || '', x, yy + 27.5);
+      font('Plex', 'normal', 9); color(GRAY); text(sg.role || '', x, yy + 32.5);
+    });
+  }
 
   // ---------- Lampiran nota ----------
   const atts = [];
