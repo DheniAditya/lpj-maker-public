@@ -31,8 +31,8 @@ a { color: var(--blue); }
 .brand img { height: 32px; width: auto; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .25)); }
 .brand span { font-size: 20px; font-weight: 300; letter-spacing: .025em; }
 .topnav { display: flex; gap: 24px; font-size: 14px; font-weight: 600; }
-.topnav a { color: rgba(255, 255, 255, .85); text-decoration: none; }
-.topnav a:hover { color: #fff; }
+.topnav button { border: 0; background: none; padding: 0; font: inherit; color: rgba(255, 255, 255, .85); cursor: pointer; }
+.topnav button:hover { color: #fff; }
 .hero-body { padding-top: 24px; }
 .kicker { margin: 0 0 12px; color: var(--sky); font-size: 12px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; }
 .tagline { margin: 0; font-size: clamp(18px, 3.2vw, 22px); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .9); }
@@ -153,7 +153,6 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
   .hero { padding-bottom: 60px; }
   .grid2, .tx-form { grid-template-columns: 1fr; }
   .topnav { gap: 12px; font-size: 13px; }
-  .topnav a:nth-child(1) { display: none; }
   .card { padding: 16px; }
   .tx-table { min-width: 0; font-size: 13px; }
   .tx-table th, .tx-table td { padding: 8px 4px; }
@@ -200,3 +199,7 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
   .pane-nav .btn { flex: 1; white-space: nowrap; padding: 10px 12px; font-size: 13px; }
   .pane-nav span:empty { display: none; }
 }
+
+/* Dialog Cara Pakai & Privasi */
+.info-dialog ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.6; }
+.info-dialog p { margin: 0; font-size: 14px; line-height: 1.6; }

@@ -320,3 +320,9 @@ function renderAll() {
   if (saved) { state = { ...blank(), ...saved }; $('#saved-status').textContent = 'Draf sebelumnya dimuat dari perangkat ini.'; }
   renderAll();
 })();
+
+// ---------- Dialog Cara Pakai & Privasi ----------
+document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => $('#' + b.dataset.open).showModal()));
+document.querySelectorAll('.info-dialog').forEach((d) => {
+  d.addEventListener('click', (e) => { if (e.target === d || e.target.closest('[data-close]')) d.close(); });
+});
