@@ -7,7 +7,7 @@ Buat **LPJ (Laporan Pertanggungjawaban)** yang rapi — dari foto nota sampai PD
 - Info laporan: judul, nama organisasi, kota, tanggal, dan logo (opsional)
 - Transaksi Debit (uang masuk) dan Kredit (uang keluar), saldo dihitung otomatis
 - Lampirkan foto nota dari galeri atau langsung dari kamera HP (otomatis dikompres)
-- Tanda tangan: tulis di layar atau unggah foto — latar putih dibuat transparan; bisa sampai 4 penanda tangan
+- Tanda tangan: tulis di layar atau unggah foto — latar putih dibuat transparan
 - Download PDF: tabel bernomor, total, saldo akhir + terbilang, tanda tangan, dan lampiran nota
 - Draf tersimpan otomatis di perangkat (IndexedDB), bisa dihapus lewat **Mulai LPJ Baru**
 

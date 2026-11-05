@@ -146,26 +146,23 @@ export async function buildPdf(state) {
   y += boxH + 14;
 
   // ---------- Tanda tangan ----------
-  // Hanya kolom yang diisi pengguna: 1 kolom untuk 1 penanda tangan, 2 untuk 2, dst.
-  const signers = state.signers.filter((x) => x.name?.trim() || x.role?.trim() || x.sig);
-  if (signers.length) {
-    const n = signers.length, perRow = n === 4 ? 2 : Math.min(n, 3);
-    const gapX = 12, colW = n === 1 ? (CW - gapX) / 2 : (CW - gapX * (perRow - 1)) / perRow, rowH = 40;
-    signers.forEach((sg, i) => {
-      const col = i % perRow, row = Math.floor(i / perRow);
-      if (col === 0 && y + row * rowH + rowH > H - 18) { doc.addPage(); y = 24 - row * rowH; }
-      const x = n === 1 ? W - M - colW : M + col * (colW + gapX);
-      const yy = y + row * rowH;
-      if (sg.sig) {
-        const maxW = colW * 0.7, maxH = 20;
-        let w = maxW, h = (sg.sig.h / sg.sig.w) * w;
-        if (h > maxH) { h = maxH; w = (sg.sig.w / sg.sig.h) * h; }
-        doc.addImage(sg.sig.src, 'PNG', x + 2, yy + (maxH - h), w, h);
-      }
-      rule(yy + 22, 0.25, x, x + colW);
-      font('Plex', 'bold', 9.5); color(INK); text(sg.name || '', x, yy + 27.5);
-      font('Plex', 'normal', 9); color(GRAY); text(sg.role || '', x, yy + 32.5);
-    });
+  // Satu penanda tangan, di sisi kanan, diawali "Hormat Kami,".
+  const sg = state.signers[0];
+  if (sg && (sg.name?.trim() || sg.role?.trim() || sg.sig)) {
+    font('Plex', 'bold', 9.5);
+    const colW = Math.min(Math.max(48, doc.getTextWidth(sg.name || '') + 2), 80);
+    if (y + 46 > H - 18) { doc.addPage(); y = 24; }
+    const x = W - M - colW, yy = y + 6;
+    font('Plex', 'normal', 9); color(INK); text('Hormat Kami,', x, yy - 1);
+    if (sg.sig) {
+      const maxW = Math.min(colW * 0.8, 42), maxH = 20;
+      let w = maxW, h = (sg.sig.h / sg.sig.w) * w;
+      if (h > maxH) { h = maxH; w = (sg.sig.w / sg.sig.h) * h; }
+      doc.addImage(sg.sig.src, 'PNG', x + 2, yy + 1 + (maxH - h), w, h);
+    }
+    rule(yy + 22, 0.25, x, x + colW);
+    font('Plex', 'bold', 9.5); color(INK); text(sg.name || '', x, yy + 27.5);
+    font('Plex', 'normal', 9); color(GRAY); text(sg.role || '', x, yy + 32.5);
   }
 
   // ---------- Lampiran nota ----------

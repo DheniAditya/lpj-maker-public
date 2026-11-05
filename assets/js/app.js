@@ -207,10 +207,8 @@ $('#tx-body').addEventListener('click', (e) => {
 
 // ---------- Penanda tangan ----------
 function renderSigners() {
-  $('#signers').innerHTML = state.signers.map((s, i) => `
+  $('#signers').innerHTML = state.signers.slice(0, 1).map((s) => `
     <div class="signer" data-id="${s.id}">
-      <div class="signer-head"><span>Penanda tangan ${i + 1}</span>
-        ${state.signers.length > 1 ? `<button type="button" class="btn btn-ghost btn-sm" data-rm-signer="${s.id}">Hapus</button>` : ''}</div>
       <label class="field">Jabatan<input type="text" data-k="role" value="${escapeHtml(s.role)}" placeholder="Contoh: Ketua Panitia"></label>
       <label class="field">Nama<input type="text" data-k="name" value="${escapeHtml(s.name)}" placeholder="Nama lengkap"></label>
       <div class="sig-box" data-sign="${s.id}" role="button" tabindex="0">
@@ -224,18 +222,11 @@ $('#signers').addEventListener('input', (e) => {
   s[k] = e.target.value; persist();
 });
 $('#signers').addEventListener('click', (e) => {
-  const rm = e.target.closest('[data-rm-signer]');
-  if (rm) { state.signers = state.signers.filter((s) => s.id !== rm.dataset.rmSigner); renderSigners(); persist(); return; }
   const box = e.target.closest('[data-sign]');
   if (box) openSignature(box.dataset.sign);
 });
 $('#signers').addEventListener('keydown', (e) => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset.sign) { e.preventDefault(); openSignature(e.target.dataset.sign); }
-});
-$('#add-signer').addEventListener('click', () => {
-  if (state.signers.length >= 4) return toast('Maksimal 4 penanda tangan.');
-  state.signers.push({ id: uid(), role: state.signers.length === 1 ? 'Mengetahui' : '', name: '', sig: null });
-  renderSigners(); persist();
 });
 
 // ---------- Dialog tanda tangan ----------
@@ -309,7 +300,7 @@ function renderSummary() {
     ['Judul', escapeHtml(state.title.trim() || '—')],
     ['Transaksi', `${state.entries.length} transaksi, ${nota} nota`],
     ['Saldo akhir', rupiah(d - c)],
-    ['Tanda tangan', `${ttd} dari ${state.signers.length} penanda tangan`],
+    ['Tanda tangan', ttd ? 'Sudah' : 'Belum'],
   ];
   $('#summary').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
 }
@@ -372,7 +363,7 @@ function renderAll() {
 
 (async () => {
   const saved = await loadDraft();
-  if (saved) { state = { ...blank(), ...saved }; $('#saved-status').textContent = 'Draf sebelumnya dimuat dari perangkat ini.'; }
+  if (saved) { state = { ...blank(), ...saved }; state.signers = (state.signers || []).slice(0, 1); if (!state.signers.length) state.signers = blank().signers; $('#saved-status').textContent = 'Draf sebelumnya dimuat dari perangkat ini.'; }
   renderAll();
 })();
 
