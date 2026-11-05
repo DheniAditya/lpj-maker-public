@@ -194,8 +194,7 @@ export async function buildPdf(state) {
       if (ih > maxH) { ih = maxH; iw = (a.img.w / a.img.h) * ih; }
       doc.addImage(a.img.src, 'JPEG', x + (cellW - iw) / 2, top + (maxH - ih) / 2, iw, ih, undefined, 'FAST');
       doc.setDrawColor(...LIGHT); doc.line(x + 4, yy + cellH - 8, x + cellW - 4, yy + cellH - 8);
-      font('Plex', 'normal', 8.5); color(GRAY); text(a.e.type === 'debit' ? 'Debit' : 'Kredit', x + 4, yy + cellH - 3.3);
-      font('PlexMono', 'normal', 9); color(INK); text('Rp' + num(a.e.amount), x + cellW - 4, yy + cellH - 3.3, { align: 'right' });
+      font('PlexMono', 'normal', 9); color(INK); text((a.e.type === 'debit' ? '+' : '-') + num(a.e.amount), x + cellW - 4, yy + cellH - 3.3, { align: 'right' });
     });
   }
 
