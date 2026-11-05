@@ -175,11 +175,12 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
 .stepper { list-style: none; margin: 0 0 22px; padding: 0; display: flex; align-items: center; }
 .stepper li { display: flex; align-items: center; flex: 1; }
 .stepper li:last-child { flex: none; }
-.stepper li:not(:last-child)::after { content: ""; flex: 1; height: 1px; background: #cbd5e1; margin: 0 10px; }
-.stepper li.done:not(:last-child)::after { background: var(--blue); }
+.stepper li:not(:last-child)::after { content: ""; flex: 1; height: 1px; margin: 0 10px; background: linear-gradient(var(--blue), var(--blue)) left / 0% 100% no-repeat, #cbd5e1; transition: background-size .4s cubic-bezier(.22, .61, .36, 1); }
+.stepper li.done:not(:last-child)::after { background-size: 100% 100%, auto; }
 .stepper button { display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; font: inherit; cursor: pointer; color: var(--muted); }
-.stepper .dot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: #e2e8f0; color: #64748b; flex: none; }
-.stepper .lbl { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.stepper .dot { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: #e2e8f0; color: #64748b; flex: none; transition: background-color .3s, color .3s, transform .3s cubic-bezier(.22, .61, .36, 1); }
+.stepper li.active .dot { transform: scale(1.08); }
+.stepper .lbl { font-size: 13px; font-weight: 600; white-space: nowrap; transition: color .3s; }
 .stepper li.active .dot { background: var(--blue); color: #fff; }
 .stepper li.active .lbl { color: var(--ink); }
 .stepper li.done .dot { background: #dbeafe; color: #1d4ed8; }
@@ -218,3 +219,7 @@ kbd { font: inherit; font-size: 11px; font-weight: 700; padding: 1px 5px; border
 .cam-dialog { width: min(640px, calc(100% - 24px)); }
 .cam-video { width: 100%; max-height: 60vh; border-radius: 12px; background: #0f172a; object-fit: contain; }
 .cam-actions { display: flex; justify-content: space-between; gap: 10px; }
+
+/* Transisi antar langkah */
+.wizard.is-moving { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .stepper *, .stepper li::after { transition: none !important; } }

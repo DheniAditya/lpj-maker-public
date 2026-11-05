@@ -305,19 +305,60 @@ function renderSummary() {
   $('#summary').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
 }
 
+const EASE = 'cubic-bezier(.22, .61, .36, 1)';
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let stepToken = 0;
+const SOFT = 'cubic-bezier(.4, 0, .2, 1)';
+function swapPanes(n) {
+  document.querySelectorAll('.pane').forEach((p) => (p.hidden = Number(p.dataset.step) !== n));
+}
+/** Transisi halus: panel lama memudar keluar, lalu panel baru masuk sambil tinggi kartu menyesuaikan. */
+async function animateStep(card, n, dir) {
+  const token = ++stepToken;
+  const old = document.querySelector('.pane:not([hidden])');
+  const next = $(`.pane[data-step="${n}"]`);
+  if (reduceMotion.matches || !card.animate || !old || old === next) return swapPanes(n);
+  card.getAnimations().forEach((a) => a.cancel());
+  document.querySelectorAll('.pane').forEach((p) => p.getAnimations().forEach((a) => a.cancel()));
+  const h0 = card.offsetHeight;
+  card.classList.add('is-moving');
+  card.style.height = h0 + 'px';
+  try {
+    await old.animate([
+      { opacity: 1, transform: 'none' },
+      { opacity: 0, transform: `translateX(${-dir * 10}px)` },
+    ], { duration: 160, easing: SOFT, fill: 'forwards' }).finished;
+  } catch { /* dibatalkan oleh klik berikutnya */ }
+  if (token !== stepToken) return;
+  old.getAnimations().forEach((a) => a.cancel());
+  swapPanes(n);
+  card.style.height = '';
+  const h1 = card.offsetHeight;
+  card.style.height = h0 + 'px';
+  const grow = card.animate([{ height: h0 + 'px' }, { height: h1 + 'px' }], { duration: 300, easing: SOFT });
+  next.animate([
+    { opacity: 0, transform: `translateX(${dir * 10}px)` },
+    { opacity: 1, transform: 'none' },
+  ], { duration: 300, delay: 40, easing: SOFT, fill: 'backwards' });
+  card.style.height = '';
+  grow.finished.then(() => { if (token === stepToken) card.classList.remove('is-moving'); }, () => {});
+}
 function showStep(n, { scroll = true } = {}) {
   if (n > 1 && !state.title.trim()) {
     n = 1; toast('Isi judul laporan dulu.'); $('#f-title').focus();
   }
+  const prev = state.step;
   state.step = n;
-  document.querySelectorAll('.pane').forEach((p) => (p.hidden = Number(p.dataset.step) !== n));
+  const card = $('#mulai');
+  if (scroll && prev && prev !== n) animateStep(card, n, n > prev ? 1 : -1);
+  else { ++stepToken; swapPanes(n); }
   document.querySelectorAll('.stepper li').forEach((li, i) => {
     li.classList.toggle('active', i + 1 === n);
     li.classList.toggle('done', i + 1 < n);
     li.querySelector('button').setAttribute('aria-current', i + 1 === n ? 'step' : 'false');
   });
   if (n === 4) renderSummary();
-  if (scroll) $('#mulai').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (scroll && $('#mulai').getBoundingClientRect().top < 0) $('#mulai').scrollIntoView({ behavior: 'smooth', block: 'start' });
   persist();
 }
 document.addEventListener('click', (e) => {
