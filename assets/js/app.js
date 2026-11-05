@@ -7,7 +7,7 @@ const $ = (s) => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 const blank = () => ({
-  title: '', org: '', city: '', date: todayIso(), logo: null,
+  title: '', pj: '', org: '', city: '', logo: null,
   entries: [],
   signers: [{ id: uid(), role: 'Penanggung Jawab', name: '', sig: null }],
   step: 1,
@@ -35,7 +35,7 @@ function toast(msg) {
 }
 
 // ---------- Info laporan ----------
-const infoFields = { title: '#f-title', org: '#f-org', city: '#f-city', date: '#f-date' };
+const infoFields = { title: '#f-title', pj: '#f-pj', org: '#f-org', city: '#f-city' };
 function renderInfo() {
   for (const [k, sel] of Object.entries(infoFields)) $(sel).value = state[k] || '';
   $('#logo-preview').hidden = !state.logo;
@@ -43,7 +43,15 @@ function renderInfo() {
   if (state.logo) $('#logo-preview').src = state.logo.src;
 }
 for (const [k, sel] of Object.entries(infoFields)) {
-  $(sel).addEventListener('input', (e) => { state[k] = e.target.value; persist(); });
+  $(sel).addEventListener('input', (e) => {
+    state[k] = e.target.value;
+    // Nama penanggung jawab otomatis jadi nama penanda tangan pertama
+    if (k === 'pj' && state.signers[0] && (!state.signers[0].name || state.signers[0].name === state._lastPj)) {
+      state.signers[0].name = e.target.value; renderSigners();
+    }
+    if (k === 'pj') state._lastPj = e.target.value;
+    persist();
+  });
 }
 $('#f-logo').addEventListener('change', async (e) => {
   const f = e.target.files[0]; e.target.value = '';
@@ -66,6 +74,53 @@ async function addFiles(files) {
   }
   renderThumbs();
 }
+// Keterangan: kolom memanjang ke bawah mengikuti isi (seperti Google Keep)
+const descInput = $('#tx-desc');
+function autoGrow() { descInput.style.height = 'auto'; descInput.style.height = descInput.scrollHeight + 2 + 'px'; }
+descInput.addEventListener('input', autoGrow);
+descInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#tx-amount').focus(); } });
+
+// Tempel (paste) gambar nota, seperti kirim gambar di WhatsApp
+document.addEventListener('paste', async (e) => {
+  if (state.step !== 2) return;
+  const files = [...(e.clipboardData?.items || [])].filter((i) => i.kind === 'file' && i.type.startsWith('image/')).map((i) => i.getAsFile());
+  if (!files.length) return;
+  e.preventDefault();
+  await addFiles(files);
+  toast(files.length > 1 ? `${files.length} gambar nota ditempel.` : 'Gambar nota ditempel.');
+});
+
+// ---------- Kamera ----------
+const camDlg = $('#cam-dialog'), camVideo = $('#cam-video');
+let camStream = null, camFacing = 'environment';
+async function startCam() {
+  stopCam();
+  camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: camFacing }, width: { ideal: 1920 } }, audio: false });
+  camVideo.srcObject = camStream;
+}
+function stopCam() { camStream?.getTracks().forEach((t) => t.stop()); camStream = null; }
+$('#btn-camera').addEventListener('click', async () => {
+  if (!navigator.mediaDevices?.getUserMedia) { $('#tx-camera').click(); return; }
+  try { camDlg.showModal(); await startCam(); }
+  catch { camDlg.close(); toast('Kamera tidak bisa dibuka. Izinkan akses kamera di browser.'); }
+});
+$('#cam-switch').addEventListener('click', async () => {
+  camFacing = camFacing === 'environment' ? 'user' : 'environment';
+  try { await startCam(); } catch { toast('Kamera lain tidak tersedia.'); }
+});
+$('#cam-shot').addEventListener('click', () => {
+  if (!camVideo.videoWidth) return;
+  const c = document.createElement('canvas');
+  c.width = camVideo.videoWidth; c.height = camVideo.videoHeight;
+  c.getContext('2d').drawImage(camVideo, 0, 0);
+  c.toBlob(async (blob) => {
+    camDlg.close();
+    await addFiles([new File([blob], 'nota.jpg', { type: 'image/jpeg' })]);
+  }, 'image/jpeg', 0.9);
+});
+$('#cam-close').addEventListener('click', () => camDlg.close());
+camDlg.addEventListener('close', stopCam);
+
 ['#tx-files', '#tx-camera'].forEach((sel) => $(sel).addEventListener('change', async (e) => {
   const files = [...e.target.files]; e.target.value = '';
   await addFiles(files);
@@ -82,7 +137,7 @@ $('#tx-thumbs').addEventListener('click', (e) => {
 
 function resetTxForm() {
   editingId = null; pendingImages = [];
-  $('#tx-desc').value = ''; amountInput.value = '';
+  $('#tx-desc').value = ''; amountInput.value = ''; autoGrow();
   document.querySelector('input[name=type][value=credit]').checked = true;
   $('#tx-submit').textContent = 'Simpan Transaksi';
   $('#tx-cancel').hidden = true;
@@ -136,7 +191,7 @@ $('#tx-body').addEventListener('click', (e) => {
   if (edit) {
     const x = state.entries.find((i) => i.id === edit);
     editingId = x.id; pendingImages = [...x.images];
-    $('#tx-desc').value = x.desc; amountInput.value = rupiah(x.amount, false);
+    $('#tx-desc').value = x.desc; autoGrow(); amountInput.value = rupiah(x.amount, false);
     document.querySelector(`input[name=type][value=${x.type}]`).checked = true;
     $('#tx-submit').textContent = 'Simpan Perubahan';
     $('#tx-cancel').hidden = false;
@@ -240,7 +295,7 @@ $('#sig-save').addEventListener('click', (e) => {
 function updateDownloadState() {
   const ready = state.title.trim() && state.entries.length;
   $('#btn-pdf').disabled = !ready;
-  $('#dl-hint').textContent = ready ? 'PDF dibuat di perangkatmu, tidak diunggah ke mana pun.' : 'Lengkapi judul dan minimal satu transaksi dulu.';
+  $('#dl-hint').textContent = ready ? '' : 'Lengkapi judul dan minimal satu transaksi dulu.';
   renderSummary();
 }
 
@@ -291,7 +346,7 @@ $('#btn-pdf').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Membuat PDF...';
   try {
     await new Promise((r) => setTimeout(r, 30));
-    const doc = buildPdf(state);
+    const doc = buildPdf({ ...state, date: todayIso() });
     const name = (state.title.trim() || 'LPJ').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80);
     doc.save(`LPJ - ${name}.pdf`);
   } catch (err) {
@@ -322,7 +377,11 @@ function renderAll() {
 })();
 
 // ---------- Dialog Cara Pakai & Privasi ----------
-document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => $('#' + b.dataset.open).showModal()));
+document.querySelectorAll('[data-open]').forEach((b) => {
+  const d = $('#' + b.dataset.open);
+  b.addEventListener('click', () => { d.showModal(); b.classList.add('active'); });
+  d.addEventListener('close', () => b.classList.remove('active'));
+});
 document.querySelectorAll('.info-dialog').forEach((d) => {
   d.addEventListener('click', (e) => { if (e.target === d || e.target.closest('[data-close]')) d.close(); });
 });

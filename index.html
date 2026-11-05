@@ -30,7 +30,6 @@
       <h1 class="sr-only">LPJ Maker</h1>
       <p class="kicker">Automatic Financial Reporting System</p>
       <p class="lead">Generate PDF financial reports instantly. Deliver on your promises—fast, responsive, and responsible.</p>
-      <a class="btn-glass" href="#mulai">Join now&rarr;</a>
     </section>
   </div>
 
@@ -38,7 +37,7 @@
     <!-- 1. Info laporan -->
     <section id="mulai" class="card wizard">
       <ol class="stepper" aria-label="Langkah">
-        <li><button type="button" data-goto="1"><span class="dot">1</span><span class="lbl">Info</span></button></li>
+        <li><button type="button" data-goto="1"><span class="dot">1</span><span class="lbl">Judul Laporan</span></button></li>
         <li><button type="button" data-goto="2"><span class="dot">2</span><span class="lbl">Transaksi</span></button></li>
         <li><button type="button" data-goto="3"><span class="dot">3</span><span class="lbl">Tanda Tangan</span></button></li>
         <li><button type="button" data-goto="4"><span class="dot">4</span><span class="lbl">Unduh</span></button></li>
@@ -46,22 +45,20 @@
 
       <!-- Langkah 1: Info -->
       <div class="pane" data-step="1">
-        <h2 class="pane-title">Laporan apa yang mau dibuat?</h2>
-        <p class="muted">Cukup isi judulnya dulu, sisanya bisa nanti.</p>
         <div class="pane-body">
           <label class="field">Judul Laporan
             <input id="f-title" type="text" placeholder="Contoh: LPJ Kegiatan Pesantren Kilat" maxlength="150">
           </label>
-          <label class="field field-date">Tanggal
-            <input id="f-date" type="date">
+          <label class="field">Nama Penanggung Jawab Laporan
+            <input id="f-pj" type="text" placeholder="Contoh: Ahmad Fulan" maxlength="100">
           </label>
-          <button id="toggle-detail" type="button" class="link-btn" aria-expanded="false">+ Tambah detail (organisasi, kota, logo)</button>
+          <button id="toggle-detail" type="button" class="link-btn" aria-expanded="false">+ Tambah detail (instansi, alamat, logo)</button>
           <div id="detail" class="grid2" hidden>
-            <label class="field"><span>Nama Organisasi / Instansi <span class="opt">(opsional)</span></span>
+            <label class="field"><span>Instansi Anda <span class="opt">(opsional)</span></span>
               <input id="f-org" type="text" placeholder="Contoh: Karang Taruna RW 05" maxlength="120">
             </label>
-            <label class="field"><span>Kota / Tempat <span class="opt">(opsional)</span></span>
-              <input id="f-city" type="text" placeholder="Contoh: Surakarta" maxlength="60">
+            <label class="field"><span>Alamat <span class="opt">(opsional)</span></span>
+              <input id="f-city" type="text" placeholder="Contoh: Jl. Merdeka No. 1, Surakarta" maxlength="150">
             </label>
             <div class="field"><span>Logo <span class="opt">(opsional)</span></span>
               <div class="logo-row">
@@ -74,14 +71,12 @@
         </div>
         <div class="pane-nav">
           <span></span>
-          <button type="button" class="btn btn-primary" data-next="2">Lanjut ke Transaksi &rarr;</button>
+          <button type="button" class="btn btn-primary" data-next="2">Lanjut ke Transaksi<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></button>
         </div>
       </div>
 
       <!-- Langkah 2: Transaksi -->
       <div class="pane" data-step="2" hidden>
-        <h2 class="pane-title">Catat transaksinya</h2>
-        <p class="muted">Debit = uang masuk, Kredit = uang keluar. Lampirkan foto nota bila ada.</p>
         <div class="pane-body">
         <form id="tx-form" class="tx-form" autocomplete="off">
           <div class="seg" role="radiogroup" aria-label="Jenis transaksi">
@@ -89,7 +84,7 @@
             <label><input type="radio" name="type" value="credit" checked><span>Kredit <small>Keluar</small></span></label>
           </div>
           <label class="field">Keterangan
-            <input id="tx-desc" type="text" placeholder="Contoh: Beli konsumsi rapat" maxlength="200" required>
+            <textarea id="tx-desc" rows="1" placeholder="Contoh: Beli konsumsi rapat" maxlength="300" required></textarea>
           </label>
           <label class="field">Nominal (Rp)
             <input id="tx-amount" type="text" inputmode="numeric" placeholder="0" required>
@@ -97,8 +92,10 @@
           <div class="field full"><span>Bukti Transaksi (nota) <span class="opt">(bisa lebih dari satu)</span></span>
             <div class="picker">
               <label class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>Upload<input id="tx-files" type="file" accept="image/*" multiple hidden></label>
-              <label class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.83 6.18A2.31 2.31 0 0 1 5.19 7.23c-.38.05-.76.11-1.13.18C3 7.58 2.25 8.51 2.25 9.57V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.57c0-1.06-.75-1.99-1.8-2.16a48 48 0 0 0-1.14-.18 2.31 2.31 0 0 1-1.64-1.05l-.82-1.32a2.19 2.19 0 0 0-1.74-1.04 48.8 48.8 0 0 0-5.23 0 2.19 2.19 0 0 0-1.74 1.04l-.82 1.32ZM16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg>Kamera<input id="tx-camera" type="file" accept="image/*" capture="environment" hidden></label>
+              <button id="btn-camera" type="button" class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.83 6.18A2.31 2.31 0 0 1 5.19 7.23c-.38.05-.76.11-1.13.18C3 7.58 2.25 8.51 2.25 9.57V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.57c0-1.06-.75-1.99-1.8-2.16a48 48 0 0 0-1.14-.18 2.31 2.31 0 0 1-1.64-1.05l-.82-1.32a2.19 2.19 0 0 0-1.74-1.04 48.8 48.8 0 0 0-5.23 0 2.19 2.19 0 0 0-1.74 1.04l-.82 1.32ZM16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg>Kamera</button>
+              <input id="tx-camera" type="file" accept="image/*" capture="environment" hidden>
             </div>
+            <p class="paste-hint muted">Atau tempel gambar nota langsung dengan <kbd>Ctrl</kbd>+<kbd>V</kbd> (di HP: tekan lama kolom Keterangan → Tempel).</p>
             <div id="tx-thumbs" class="thumbs"></div>
           </div>
           <div class="form-actions">
@@ -120,29 +117,27 @@
         </div>
         </div>
         <div class="pane-nav">
-          <button type="button" class="btn btn-ghost" data-next="1">&larr; Kembali</button>
-          <button type="button" class="btn btn-primary" data-next="3">Lanjut ke Tanda Tangan &rarr;</button>
+          <button type="button" class="btn btn-ghost" data-next="1"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg>Kembali</button>
+          <button type="button" class="btn btn-primary" data-next="3">Lanjut ke Tanda Tangan<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></button>
         </div>
       </div>
 
       <!-- Langkah 3: Tanda tangan -->
       <div class="pane" data-step="3" hidden>
-        <h2 class="pane-title">Siapa yang menandatangani?</h2>
-        <p class="muted">Bisa lebih dari satu, misalnya Ketua dan Bendahara.</p>
         <div class="pane-body">
           <div id="signers" class="signers"></div>
-          <button id="add-signer" type="button" class="link-btn">+ Tambah penanda tangan</button>
+          <button id="add-signer" type="button" class="link-btn">+ Tambah kolom tanda tangan</button>
         </div>
         <div class="pane-nav">
-          <button type="button" class="btn btn-ghost" data-next="2">&larr; Kembali</button>
-          <button type="button" class="btn btn-primary" data-next="4">Lanjut ke Unduh &rarr;</button>
+          <button type="button" class="btn btn-ghost" data-next="2"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg>Kembali</button>
+          <button type="button" class="btn btn-primary" data-next="4">Lanjut ke Unduh<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></button>
         </div>
       </div>
 
       <!-- Langkah 4: Unduh -->
       <div class="pane" data-step="4" hidden>
         <h2 class="pane-title">LPJ siap diunduh</h2>
-        <p class="muted" id="dl-hint">PDF dibuat di perangkatmu, tidak diunggah ke mana pun.</p>
+        <p class="muted" id="dl-hint"></p>
         <div class="pane-body">
           <dl id="summary" class="summary"></dl>
           <div class="cta-actions">
@@ -152,7 +147,7 @@
           <p class="saved muted" id="saved-status" aria-live="polite"></p>
         </div>
         <div class="pane-nav">
-          <button type="button" class="btn btn-ghost" data-next="3">&larr; Kembali</button>
+          <button type="button" class="btn btn-ghost" data-next="3"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 6-6m-6 6 6 6"/></svg>Kembali</button>
           <span></span>
         </div>
       </div>
@@ -172,8 +167,8 @@
     <div class="dialog-inner">
       <div class="dialog-head"><h3 id="t-cara">Cara Pakai</h3><button type="button" class="icon-btn" data-close aria-label="Tutup">✕</button></div>
       <ol>
-        <li><b>Info</b>: isi judul dan tanggal. Organisasi, kota, dan logo bisa ditambahkan lewat <i>Tambah detail</i>.</li>
-        <li><b>Transaksi</b>: pilih Debit atau Kredit, isi keterangan dan nominal, lampirkan foto nota dari galeri atau kamera.</li>
+        <li><b>Judul Laporan</b>: isi judul dan nama penanggung jawab. Instansi, alamat, dan logo bisa ditambahkan lewat <i>Tambah detail</i>.</li>
+        <li><b>Transaksi</b>: pilih Debit atau Kredit, isi keterangan dan nominal, lampirkan foto nota dari galeri, kamera, atau tempel (paste) gambar.</li>
         <li><b>Tanda Tangan</b>: tulis langsung di layar atau unggah gambar tanda tangan. Latar putih otomatis dibuat transparan.</li>
         <li><b>Unduh</b>: tabel bernomor, total, saldo akhir, tanda tangan, dan lampiran nota.</li>
       </ol>
@@ -184,6 +179,17 @@
     <div class="dialog-inner">
       <div class="dialog-head"><h3 id="t-privasi">Privasi</h3><button type="button" class="icon-btn" data-close aria-label="Tutup">✕</button></div>
       <p>LPJ Maker berjalan sepenuhnya di browser. Foto nota, tanda tangan, dan data transaksi <b>tidak pernah dikirim ke server</b>. Draf disimpan di perangkat ini saja agar tidak hilang saat halaman tertutup, dan bisa dihapus kapan saja lewat tombol <i>Mulai LPJ Baru</i>.</p>
+    </div>
+  </dialog>
+
+  <dialog id="cam-dialog" class="dialog cam-dialog" aria-label="Kamera">
+    <div class="dialog-inner">
+      <div class="dialog-head"><h3>Foto Nota</h3><button type="button" class="icon-btn" id="cam-close" aria-label="Tutup">✕</button></div>
+      <video id="cam-video" class="cam-video" autoplay playsinline muted></video>
+      <div class="cam-actions">
+        <button id="cam-switch" type="button" class="btn btn-ghost btn-sm">Ganti kamera</button>
+        <button id="cam-shot" type="button" class="btn btn-primary">Ambil Foto</button>
+      </div>
     </div>
   </dialog>
 

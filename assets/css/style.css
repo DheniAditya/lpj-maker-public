@@ -31,7 +31,12 @@ a { color: var(--blue); }
 .brand img { height: 32px; width: auto; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .25)); }
 .brand span { font-size: 20px; font-weight: 300; letter-spacing: .025em; }
 .topnav { display: flex; gap: 24px; font-size: 14px; font-weight: 600; }
-.topnav button { border: 0; background: none; padding: 0; font: inherit; color: rgba(255, 255, 255, .85); cursor: pointer; }
+.topnav button { position: relative; border: 0; background: none; padding: 6px 0; font: inherit; color: rgba(255, 255, 255, .85); cursor: pointer; }
+.topnav button::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: #fff; transform: scaleX(0); transition: transform .2s; }
+.topnav button:hover::after, .topnav button.active::after { transform: scaleX(1); }
+.topnav button.active { color: #fff; }
+.topnav button:focus { outline: none; }
+.topnav button:focus-visible::after { transform: scaleX(1); }
 .topnav button:hover { color: #fff; }
 .hero-body { padding-top: 24px; }
 .kicker { margin: 0 0 12px; color: var(--sky); font-size: 12px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; }
@@ -54,7 +59,7 @@ a { color: var(--blue); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .full { grid-column: 1 / -1; }
 .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: #334155; }
-input[type=text], input[type=date] {
+input[type=text], input[type=date], textarea {
   font: inherit; font-weight: 500; font-size: 15px; color: var(--ink);
   border: 1px solid #cbd5e1; border-radius: 12px; padding: 11px 14px; min-height: 46px; background: #fff; width: 100%;
 }
@@ -203,3 +208,13 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
 /* Dialog Cara Pakai & Privasi */
 .info-dialog ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.6; }
 .info-dialog p { margin: 0; font-size: 14px; line-height: 1.6; }
+
+textarea { resize: none; overflow: hidden; line-height: 1.5; min-height: 46px; display: block; }
+.ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.pane-nav .btn { gap: 8px; }
+button.drop { font: inherit; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; width: 100%; }
+.paste-hint { margin: 2px 0 0; font-size: 12px; font-weight: 500; }
+kbd { font: inherit; font-size: 11px; font-weight: 700; padding: 1px 5px; border: 1px solid #cbd5e1; border-bottom-width: 2px; border-radius: 5px; background: #fff; color: #334155; }
+.cam-dialog { width: min(640px, calc(100% - 24px)); }
+.cam-video { width: 100%; max-height: 60vh; border-radius: 12px; background: #0f172a; object-fit: contain; }
+.cam-actions { display: flex; justify-content: space-between; gap: 10px; }

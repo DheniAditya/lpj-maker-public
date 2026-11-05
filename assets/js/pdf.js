@@ -39,13 +39,18 @@ export function buildPdf(state) {
     doc.setFont(F, 'normal'); doc.setFontSize(11); setColor(INK);
     text(state.org, kopX, hy + 6); hy += 6;
   }
+  if (state.city) {
+    doc.setFont(F, 'normal'); doc.setFontSize(9); setColor(MUTED);
+    const al = doc.splitTextToSize(state.city, W - M - kopX);
+    text(al, kopX, hy + 5); hy += 5 + (al.length - 1) * 4;
+  }
   y = Math.max(y + (state.logo ? 18 : 0), hy + 4);
   doc.setDrawColor(...NAVY); doc.setLineWidth(0.6); doc.line(M, y, W - M, y);
   doc.setDrawColor(...SKY); doc.setLineWidth(0.3); doc.line(M, y + 1, W - M, y + 1);
   y += 7;
 
   // Meta: penanggung jawab & tanggal
-  const pj = state.signers.find((s) => s.name)?.name || '-';
+  const pj = state.pj?.trim() || state.signers.find((s) => s.name)?.name || '-';
   doc.setFont(F, 'normal'); doc.setFontSize(8); setColor(MUTED);
   text('PENANGGUNG JAWAB', M, y);
   text('TANGGAL', W - M, y, { align: 'right' });
@@ -131,13 +136,10 @@ export function buildPdf(state) {
     const blockH = 48;
     if (y + blockH > H - M) { doc.addPage(); y = M + 4; }
     doc.setFont(F, 'normal'); doc.setFontSize(10.5); setColor(INK);
-    const place = [state.city, tanggalIndo(state.date)].filter(Boolean).join(', ');
     const n = signers.length;
     const slotW = Math.min(62, CW / n);
     const startX = n === 1 ? W - M - slotW : M + (CW - slotW * n) / 2 + (n === 2 ? 0 : 0);
     const xs = signers.map((_, i) => (n === 1 ? startX : n === 2 ? (i === 0 ? M : W - M - slotW) : startX + i * slotW));
-    text(place, xs[n - 1] + slotW / 2, y, { align: 'center' });
-    y += 6;
     signers.forEach((s, i) => {
       const cx = xs[i] + slotW / 2;
       doc.setFont(F, 'normal'); doc.setFontSize(10.5); setColor(INK);
