@@ -1,197 +1,207 @@
 // Membuat PDF LPJ langsung di browser dengan jsPDF.
-import { rupiah, terbilang, tanggalIndo } from './format.js';
+// Gaya: monokrom, IBM Plex Sans untuk teks dan IBM Plex Mono untuk angka.
+import { terbilang, tanggalIndo } from './format.js';
 
-const NAVY = [15, 42, 74];
-const SKY = [191, 219, 254];
-const GREEN = [5, 150, 105];
-const RED = [225, 29, 72];
-const INK = [30, 41, 59];
-const MUTED = [100, 116, 139];
-const LINE = [226, 232, 240];
-const ZEBRA = [248, 250, 252];
+const INK = [17, 17, 17];
+const GRAY = [102, 102, 102];
+const LIGHT = [204, 204, 204];
+const BOX = [242, 242, 242];
 
-export function buildPdf(state) {
+const FONTS = [
+  ['IBMPlexSans-Regular.ttf', 'Plex', 'normal'],
+  ['IBMPlexSans-SemiBold.ttf', 'Plex', 'bold'],
+  ['IBMPlexSans-Italic.ttf', 'Plex', 'italic'],
+  ['IBMPlexMono-Regular.ttf', 'PlexMono', 'normal'],
+  ['IBMPlexMono-SemiBold.ttf', 'PlexMono', 'bold'],
+];
+let fontData = null;
+
+async function loadFonts() {
+  if (fontData) return fontData;
+  const base = new URL('../fonts/', import.meta.url);
+  fontData = await Promise.all(FONTS.map(async ([file]) => {
+    const buf = new Uint8Array(await (await fetch(new URL(file, base))).arrayBuffer());
+    let bin = '';
+    for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+    return btoa(bin);
+  }));
+  return fontData;
+}
+
+const num = (n) => Math.abs(Math.round(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+/** Angka akuntansi: minus ditulis dalam kurung, contoh (194). */
+const acc = (n, rp = false) => (n < 0 ? `(${rp ? 'Rp' : ''}${num(n)})` : `${rp ? 'Rp' : ''}${num(n)}`);
+
+export async function buildPdf(state) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const W = 210, H = 297, M = 16, CW = W - 2 * M;
-  const F = 'times';
-  let y = M;
-
-  const setColor = (c) => doc.setTextColor(...c);
-  const text = (s, x, yy, opt = {}) => doc.text(Array.isArray(s) ? s : String(s), x, yy, opt);
-
-  // ---------- Kop ----------
-  let kopX = M;
-  if (state.logo) {
-    const lh = 16, lw = Math.min(30, (state.logo.w / state.logo.h) * lh);
-    doc.addImage(state.logo.src, 'PNG', M, y, lw, lh);
-    kopX = M + lw + 5;
-  }
-  doc.setFont(F, 'normal'); doc.setFontSize(8.5); setColor(MUTED);
-  doc.setCharSpace(0.6);
-  text('LEMBAR PERTANGGUNGJAWABAN ANGGARAN', kopX, y + 4);
-  doc.setCharSpace(0);
-  doc.setFont(F, 'bold'); doc.setFontSize(17); setColor(NAVY);
-  const titleLines = doc.splitTextToSize(state.title || 'Laporan Pertanggungjawaban', W - M - kopX);
-  text(titleLines, kopX, y + 11);
-  let hy = y + 11 + (titleLines.length - 1) * 6.5;
-  if (state.org) {
-    doc.setFont(F, 'normal'); doc.setFontSize(11); setColor(INK);
-    text(state.org, kopX, hy + 6); hy += 6;
-  }
-  if (state.city) {
-    doc.setFont(F, 'normal'); doc.setFontSize(9); setColor(MUTED);
-    const al = doc.splitTextToSize(state.city, W - M - kopX);
-    text(al, kopX, hy + 5); hy += 5 + (al.length - 1) * 4;
-  }
-  y = Math.max(y + (state.logo ? 18 : 0), hy + 4);
-  doc.setDrawColor(...NAVY); doc.setLineWidth(0.6); doc.line(M, y, W - M, y);
-  doc.setDrawColor(...SKY); doc.setLineWidth(0.3); doc.line(M, y + 1, W - M, y + 1);
-  y += 7;
-
-  // Meta: penanggung jawab & tanggal
-  const pj = state.pj?.trim() || state.signers.find((s) => s.name)?.name || '-';
-  doc.setFont(F, 'normal'); doc.setFontSize(8); setColor(MUTED);
-  text('PENANGGUNG JAWAB', M, y);
-  text('TANGGAL', W - M, y, { align: 'right' });
-  doc.setFont(F, 'bold'); doc.setFontSize(11); setColor(INK);
-  text(pj, M, y + 5.5);
-  text(tanggalIndo(state.date), W - M, y + 5.5, { align: 'right' });
-  y += 12;
-
-  // ---------- Tabel transaksi ----------
-  const cols = [
-    { k: 'no', t: 'NO', w: 11, a: 'center' },
-    { k: 'desc', t: 'KETERANGAN', w: 73, a: 'left' },
-    { k: 'nota', t: 'NOTA', w: 28, a: 'center' },
-    { k: 'debit', t: 'DEBIT (RP)', w: 33, a: 'right' },
-    { k: 'credit', t: 'KREDIT (RP)', w: CW - 11 - 73 - 28 - 33, a: 'right' },
-  ];
-  const colX = []; cols.reduce((x, c) => (colX.push(x), x + c.w), M);
-  const pad = 2.6;
-
-  const header = () => {
-    doc.setFillColor(...NAVY);
-    doc.roundedRect(M, y, CW, 9, 1.5, 1.5, 'F');
-    doc.rect(M, y + 4, CW, 5, 'F');
-    doc.setFont(F, 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
-    cols.forEach((c, i) => {
-      const x = c.a === 'left' ? colX[i] + pad : c.a === 'right' ? colX[i] + c.w - pad : colX[i] + c.w / 2;
-      text(c.t, x, y + 5.8, { align: c.a });
-    });
-    y += 9;
-  };
-  const newPage = () => { doc.addPage(); y = M; header(); };
-
-  header();
-  let td = 0, tc = 0;
-  state.entries.forEach((e, idx) => {
-    const isDebit = e.type === 'debit';
-    if (isDebit) td += e.amount; else tc += e.amount;
-    doc.setFont(F, 'normal'); doc.setFontSize(10);
-    const descLines = doc.splitTextToSize(e.desc, cols[1].w - 2 * pad);
-    const h = Math.max(8.5, descLines.length * 4.6 + 4);
-    if (y + h > H - M - 30) newPage();
-    if (idx % 2 === 1) { doc.setFillColor(...ZEBRA); doc.rect(M, y, CW, h, 'F'); }
-    const mid = y + h / 2 + 1.3;
-    setColor(MUTED); text(String(idx + 1), colX[0] + cols[0].w / 2, mid, { align: 'center' });
-    setColor(INK); text(descLines, colX[1] + pad, y + 5.3);
-    doc.setFontSize(8.5);
-    const n = e.images.length;
-    setColor(n || isDebit ? MUTED : [190, 18, 60]);
-    text(n ? (n > 1 ? `Terlampir (${n})` : 'Terlampir') : isDebit ? '—' : 'Tidak terlampir', colX[2] + cols[2].w / 2, mid, { align: 'center' });
-    doc.setFontSize(10);
-    if (isDebit) { setColor(GREEN); text(rupiah(e.amount, false), colX[3] + cols[3].w - pad, mid, { align: 'right' }); }
-    else { setColor(MUTED); text('—', colX[3] + cols[3].w - pad, mid, { align: 'right' }); }
-    if (!isDebit) { setColor(RED); text(rupiah(e.amount, false), colX[4] + cols[4].w - pad, mid, { align: 'right' }); }
-    else { setColor(MUTED); text('—', colX[4] + cols[4].w - pad, mid, { align: 'right' }); }
-    doc.setDrawColor(...LINE); doc.setLineWidth(0.2); doc.line(M, y + h, W - M, y + h);
-    y += h;
+  const fonts = await loadFonts();
+  FONTS.forEach(([file, family, style], i) => {
+    doc.addFileToVFS(file, fonts[i]);
+    doc.addFont(file, family, style);
   });
 
-  // Total & saldo
-  if (y + 30 > H - M) newPage();
-  doc.setFont(F, 'bold'); doc.setFontSize(10.5); setColor(INK);
-  text('Total', colX[2] + cols[2].w - pad, y + 6, { align: 'right' });
-  setColor(GREEN); text(rupiah(td, false), colX[3] + cols[3].w - pad, y + 6, { align: 'right' });
-  setColor(RED); text(rupiah(tc, false), colX[4] + cols[4].w - pad, y + 6, { align: 'right' });
-  y += 9.5;
-  const bal = td - tc;
-  doc.setFillColor(...NAVY); doc.roundedRect(M, y, CW, 16, 2, 2, 'F');
-  doc.setFont(F, 'bold'); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
-  doc.setCharSpace(0.8); text('SALDO AKHIR', M + 6, y + 7); doc.setCharSpace(0);
-  doc.setFont(F, 'italic'); doc.setFontSize(8.5); setColor(SKY);
-  text(bal < 0 ? 'Pengeluaran melebihi dana masuk' : bal > 0 ? 'Sisa dana' : 'Dana habis terpakai', M + 6, y + 12);
-  doc.setFont(F, 'bold'); doc.setFontSize(15);
-  if (bal < 0) doc.setTextColor(253, 164, 175); else doc.setTextColor(167, 243, 208);
-  text(rupiah(bal), W - M - 6, y + 10.3, { align: 'right' });
-  y += 20;
-  doc.setFont(F, 'italic'); doc.setFontSize(9); setColor(MUTED);
-  const terb = doc.splitTextToSize(`Terbilang: ${terbilang(Math.abs(bal))} Rupiah${bal < 0 ? ' (minus)' : ''}`, CW);
-  text(terb, M, y + 2); y += terb.length * 4.2 + 6;
+  const W = 210, H = 297, M = 17, CW = W - 2 * M;
+  let y = 20;
+  const color = (c) => doc.setTextColor(...c);
+  const font = (f, s, size) => { doc.setFont(f, s); doc.setFontSize(size); };
+  const text = (s, x, yy, opt = {}) => doc.text(Array.isArray(s) ? s : String(s), x, yy, opt);
+  const rule = (yy, w = 0.25, x0 = M, x1 = W - M) => { doc.setDrawColor(...INK); doc.setLineWidth(w); doc.line(x0, yy, x1, yy); };
+
+  // ---------- Judul ----------
+  let tx = M;
+  if (state.logo) {
+    const lh = 14, lw = Math.min(28, (state.logo.w / state.logo.h) * lh);
+    doc.addImage(state.logo.src, 'PNG', W - M - lw, y - 3, lw, lh);
+  }
+  font('Plex', 'normal', 7.5); color(GRAY);
+  doc.setCharSpace(0.9); text('LAPORAN PERTANGGUNGJAWABAN', tx, y); doc.setCharSpace(0);
+  font('Plex', 'bold', 17); color(INK);
+  const title = doc.splitTextToSize(state.title || 'Laporan Pertanggungjawaban', CW - (state.logo ? 34 : 0));
+  text(title, tx, y + 8.5);
+  y += 8.5 + (title.length - 1) * 7;
+  const sub = [state.org, state.city].filter(Boolean).join(' · ');
+  if (sub) { font('Plex', 'normal', 9); color(GRAY); text(sub, tx, y + 5.5); y += 5.5; }
+  y += 5;
+  rule(y, 0.5);
+  y += 8;
+
+  // ---------- Penanggung jawab & tanggal ----------
+  const pj = state.pj?.trim() || state.signers.find((s) => s.name)?.name || '-';
+  font('Plex', 'normal', 9); color(GRAY);
+  text('Penanggungjawab', M, y);
+  text('Tanggal Laporan', W - M, y, { align: 'right' });
+  font('Plex', 'bold', 9.5); color(INK);
+  text(pj, M, y + 6);
+  text(tanggalIndo(state.date), W - M, y + 6, { align: 'right' });
+  y += 13;
+
+  // ---------- Tabel ----------
+  const cols = [
+    { t: 'No', w: 13, a: 'center' },
+    { t: 'Keterangan', w: 62, a: 'left' },
+    { t: 'Bukti', w: 29, a: 'left' },
+    { t: 'Debit', w: 24, a: 'right' },
+    { t: 'Kredit', w: 24, a: 'right' },
+    { t: 'Saldo', w: CW - 13 - 62 - 29 - 24 - 24, a: 'right' },
+  ];
+  const cx = []; cols.reduce((x, c) => (cx.push(x), x + c.w), M);
+  const pad = 2;
+  const at = (i) => (cols[i].a === 'left' ? cx[i] + pad : cols[i].a === 'right' ? cx[i] + cols[i].w - pad : cx[i] + cols[i].w / 2);
+
+  const header = () => {
+    rule(y, 0.3);
+    font('Plex', 'bold', 9); color(INK);
+    cols.forEach((c, i) => text(c.t, at(i), y + 5.6, { align: c.a }));
+    y += 8.5;
+    rule(y, 0.3);
+  };
+  header();
+
+  let saldo = 0, td = 0, tc = 0;
+  state.entries.forEach((e, idx) => {
+    const d = e.type === 'debit';
+    if (d) { td += e.amount; saldo += e.amount; } else { tc += e.amount; saldo -= e.amount; }
+    font('Plex', 'normal', 9);
+    const lines = doc.splitTextToSize(e.desc, cols[1].w - 2 * pad);
+    const h = Math.max(8.5, lines.length * 4.3 + 4.2);
+    if (y + h > H - 40) { doc.addPage(); y = 20; header(); }
+    const base = y + 5.6;
+    color(INK);
+    text(String(idx + 1), at(0), base, { align: 'center' });
+    text(lines, at(1), base);
+    const n = e.images.length;
+    text(n ? 'Terlampir' + (n > 1 ? ` (${n})` : '') : d ? '-' : 'Tidak terlampir', at(2), base);
+    font('PlexMono', 'normal', 9);
+    text(d ? num(e.amount) : '-', at(3), base, { align: 'right' });
+    text(d ? '-' : num(e.amount), at(4), base, { align: 'right' });
+    text(acc(saldo), at(5), base, { align: 'right' });
+    y += h;
+    if (idx < state.entries.length - 1) { doc.setDrawColor(...LIGHT); doc.setLineWidth(0.2); doc.line(M, y, W - M, y); }
+  });
+  rule(y, 0.3);
+  y += 7;
+
+  // ---------- Ringkasan ----------
+  if (y + 52 > H - 20) { doc.addPage(); y = 20; }
+  const sx = M + CW * 0.55, ex = W - M;
+  const sumRow = (label, val, bold = false) => {
+    font('Plex', bold ? 'bold' : 'normal', 9); color(bold ? INK : GRAY); text(label, sx, y);
+    font('PlexMono', bold ? 'bold' : 'normal', 9); color(INK); text(val, ex, y, { align: 'right' });
+  };
+  sumRow('Total Debit (dana masuk)', 'Rp' + num(td)); y += 6;
+  sumRow('Total Kredit (pengeluaran)', 'Rp' + num(tc)); y += 3.2;
+  rule(y, 0.5, sx, ex); y += 5.6;
+  sumRow('Saldo Akhir', acc(saldo, true), true); y += 7;
+
+  // Terbilang + catatan
+  const terb = `${saldo < 0 ? 'Minus ' : ''}${terbilang(Math.abs(saldo))} Rupiah`;
+  const note = saldo < 0 ? `Catatan: pengeluaran melebihi dana masuk sebesar Rp${num(saldo)}.`
+    : saldo > 0 ? `Catatan: sisa dana sebesar Rp${num(saldo)}.` : 'Catatan: dana habis terpakai.';
+  font('Plex', 'italic', 8.5);
+  const terbLines = doc.splitTextToSize(terb, CW - 30);
+  const boxH = 6 + terbLines.length * 4.2 + 5;
+  doc.setFillColor(...BOX); doc.rect(M, y, CW, boxH, 'F');
+  font('Plex', 'bold', 8.5); color(INK); text('Terbilang:', M + 4, y + 5.6);
+  const lw = doc.getTextWidth('Terbilang:') + 1.6;
+  font('Plex', 'italic', 8.5); text(terbLines, M + 4 + lw, y + 5.6);
+  font('Plex', 'normal', 8.5); color(GRAY); text(note, M + 4, y + 5.6 + terbLines.length * 4.2);
+  y += boxH + 14;
 
   // ---------- Tanda tangan ----------
-  const signers = state.signers.filter((s) => s.name || s.role || s.sig);
-  if (signers.length) {
-    const blockH = 48;
-    if (y + blockH > H - M) { doc.addPage(); y = M + 4; }
-    doc.setFont(F, 'normal'); doc.setFontSize(10.5); setColor(INK);
-    const n = signers.length;
-    const slotW = Math.min(62, CW / n);
-    const startX = n === 1 ? W - M - slotW : M + (CW - slotW * n) / 2 + (n === 2 ? 0 : 0);
-    const xs = signers.map((_, i) => (n === 1 ? startX : n === 2 ? (i === 0 ? M : W - M - slotW) : startX + i * slotW));
-    signers.forEach((s, i) => {
-      const cx = xs[i] + slotW / 2;
-      doc.setFont(F, 'normal'); doc.setFontSize(10.5); setColor(INK);
-      text(s.role || '', cx, y, { align: 'center' });
-      if (s.sig) {
-        const maxW = slotW - 8, maxH = 22;
-        let sw = maxW, sh = (s.sig.h / s.sig.w) * sw;
-        if (sh > maxH) { sh = maxH; sw = (s.sig.w / s.sig.h) * sh; }
-        doc.addImage(s.sig.src, 'PNG', cx - sw / 2, y + 3 + (maxH - sh), sw, sh);
-      }
-      doc.setDrawColor(...INK); doc.setLineWidth(0.25);
-      doc.line(cx - slotW / 2 + 6, y + 28, cx + slotW / 2 - 6, y + 28);
-      doc.setFont(F, 'bold'); doc.setFontSize(10.5);
-      text(s.name || '', cx, y + 33, { align: 'center' });
-    });
-    y += 38;
-  }
+  // Penanda tangan pertama = pembuat laporan (kanan), yang lain = pemeriksa (kiri).
+  const [maker, ...others] = state.signers;
+  const slots = [];
+  const checkers = others.length ? others : [{ role: '', name: '', sig: null, empty: true }];
+  checkers.forEach((s, i) => slots.push({ ...s, label: i === 0 ? 'Diperiksa oleh,' : 'Mengetahui,' }));
+  if (maker) slots.push({ ...maker, label: `Dibuat oleh, ${tanggalIndo(state.date)}` });
+  const colW = (CW - 14) / 2, rowH = 46;
+  // Urutan tampil: baris pertama [pemeriksa, pembuat], sisanya mengikuti.
+  const order = [slots[0], slots[slots.length - 1], ...slots.slice(1, -1)].filter(Boolean);
+  order.forEach((s, i) => {
+    const col = i % 2, row = Math.floor(i / 2);
+    if (col === 0 && y + row * rowH + rowH > H - 18) { doc.addPage(); y = 24 - row * rowH; }
+    const x = M + col * (colW + 14), yy = y + row * rowH;
+    font('Plex', 'normal', 9.5); color(INK); text(s.label, x, yy);
+    if (s.sig) {
+      const maxW = colW * 0.6, maxH = 20;
+      let w = maxW, h = (s.sig.h / s.sig.w) * w;
+      if (h > maxH) { h = maxH; w = (s.sig.w / s.sig.h) * h; }
+      doc.addImage(s.sig.src, 'PNG', x + 2, yy + 4 + (maxH - h), w, h);
+    }
+    rule(yy + 26, 0.25, x, x + colW);
+    font('Plex', 'bold', 9.5); color(INK); text(s.name || '', x, yy + 31.5);
+    font('Plex', 'normal', 9); color(GRAY); text(s.role || '', x, yy + 36.5);
+  });
 
   // ---------- Lampiran nota ----------
   const atts = [];
   state.entries.forEach((e, i) => e.images.forEach((img, k) => atts.push({ no: i + 1, e, img, k, n: e.images.length })));
   if (atts.length) {
-    const gap = 6, cellW = (CW - gap) / 2, cellH = (H - 2 * M - 14 - gap) / 2;
+    const gap = 6, top0 = 34, cellW = (CW - gap) / 2, cellH = (H - top0 - 22 - gap) / 2;
     atts.forEach((a, j) => {
       const slot = j % 4;
       if (slot === 0) {
         doc.addPage();
-        doc.setFont(F, 'bold'); doc.setFontSize(13); setColor(NAVY);
-        text('Lampiran Bukti Transaksi', M, M + 4);
-        doc.setDrawColor(...LINE); doc.setLineWidth(0.3); doc.line(M, M + 7, W - M, M + 7);
+        font('Plex', 'normal', 7.5); color(GRAY);
+        doc.setCharSpace(0.9); text('LAMPIRAN BUKTI TRANSAKSI', M, 20); doc.setCharSpace(0);
+        font('Plex', 'bold', 13); color(INK); text(state.title || 'Laporan Pertanggungjawaban', M, 27);
+        rule(30, 0.5);
       }
       const x = M + (slot % 2) * (cellW + gap);
-      const yy = M + 12 + Math.floor(slot / 2) * (cellH + gap);
-      doc.setDrawColor(...LINE); doc.setLineWidth(0.3); doc.roundedRect(x, yy, cellW, cellH, 2.5, 2.5, 'S');
-      // Nomor + keterangan
-      doc.setFillColor(...NAVY); doc.roundedRect(x + 4, yy + 4, 7, 6, 1.2, 1.2, 'F');
-      doc.setFont(F, 'bold'); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
-      text(String(a.no), x + 7.5, yy + 8.2, { align: 'center' });
-      setColor(INK); doc.setFontSize(9.5);
+      const yy = top0 + Math.floor(slot / 2) * (cellH + gap);
+      doc.setDrawColor(...LIGHT); doc.setLineWidth(0.25); doc.rect(x, yy, cellW, cellH);
+      font('PlexMono', 'bold', 9); color(INK); text(String(a.no).padStart(2, '0'), x + 4, yy + 6.5);
+      font('Plex', 'normal', 8.5);
       const cap = doc.splitTextToSize(a.e.desc + (a.n > 1 ? ` (${a.k + 1}/${a.n})` : ''), cellW - 18);
-      text(cap.slice(0, 2), x + 13, yy + 8.2);
-      // Gambar
-      const top = yy + 16, bottom = yy + cellH - 11;
-      const maxW = cellW - 10, maxH = bottom - top;
+      text(cap.slice(0, 2), x + 12, yy + 6.5);
+      const top = yy + 15, bottom = yy + cellH - 11, maxW = cellW - 8, maxH = bottom - top;
       let iw = maxW, ih = (a.img.h / a.img.w) * iw;
       if (ih > maxH) { ih = maxH; iw = (a.img.w / a.img.h) * ih; }
       doc.addImage(a.img.src, 'JPEG', x + (cellW - iw) / 2, top + (maxH - ih) / 2, iw, ih, undefined, 'FAST');
-      // Nominal
-      doc.setDrawColor(...LINE); doc.line(x + 4, yy + cellH - 8, x + cellW - 4, yy + cellH - 8);
-      doc.setFont(F, 'bold'); doc.setFontSize(9);
-      setColor(a.e.type === 'debit' ? GREEN : RED);
-      text(`${a.e.type === 'debit' ? 'Debit' : 'Kredit'} · ${rupiah(a.e.amount)}`, x + cellW - 4, yy + cellH - 3.2, { align: 'right' });
+      doc.setDrawColor(...LIGHT); doc.line(x + 4, yy + cellH - 8, x + cellW - 4, yy + cellH - 8);
+      font('Plex', 'normal', 8.5); color(GRAY); text(a.e.type === 'debit' ? 'Debit' : 'Kredit', x + 4, yy + cellH - 3.3);
+      font('PlexMono', 'normal', 9); color(INK); text('Rp' + num(a.e.amount), x + cellW - 4, yy + cellH - 3.3, { align: 'right' });
     });
   }
 
@@ -199,9 +209,8 @@ export function buildPdf(state) {
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
-    doc.setFont(F, 'normal'); doc.setFontSize(8); setColor(MUTED);
-    text(`Halaman ${p} dari ${pages}`, W - M, H - 8, { align: 'right' });
-    text('Dibuat dengan LPJ Maker', M, H - 8);
+    font('PlexMono', 'normal', 9.5); color(INK);
+    text(`page ${p}/${pages}`, W / 2, H - 12, { align: 'center' });
   }
 
   doc.setProperties({ title: state.title || 'LPJ', creator: 'LPJ Maker' });

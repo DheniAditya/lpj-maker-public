@@ -50,6 +50,8 @@ Issue dan pull request sangat diterima. Mohon jaga prinsip utamanya: **tidak ada
 
 - Foto latar halaman: [hans middendorp](https://www.pexels.com/photo/steel-construction-and-tower-under-clear-sky-9092855/) dari Pexels ([Lisensi Pexels](https://www.pexels.com/license/)).
 
+- Font PDF: [IBM Plex Sans & IBM Plex Mono](https://github.com/IBM/plex) (SIL Open Font License, lihat `assets/fonts/OFL.txt`).
+
 ## Lisensi
 
 [MIT](LICENSE) © 2026 Deni Aditya Warman. Menggunakan [jsPDF](https://github.com/parallax/jsPDF) (MIT).

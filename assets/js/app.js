@@ -346,7 +346,7 @@ $('#btn-pdf').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Membuat PDF...';
   try {
     await new Promise((r) => setTimeout(r, 30));
-    const doc = buildPdf({ ...state, date: todayIso() });
+    const doc = await buildPdf({ ...state, date: todayIso() });
     const name = (state.title.trim() || 'LPJ').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80);
     doc.save(`LPJ - ${name}.pdf`);
   } catch (err) {
