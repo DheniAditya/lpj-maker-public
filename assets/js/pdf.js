@@ -29,8 +29,8 @@ async function loadFonts() {
 }
 
 const num = (n) => Math.abs(Math.round(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-/** Angka akuntansi: minus ditulis dalam kurung, contoh (194). */
-const acc = (n, rp = false) => (n < 0 ? `(${rp ? 'Rp' : ''}${num(n)})` : `${rp ? 'Rp' : ''}${num(n)}`);
+/** Angka bertanda: minus ditulis dengan tanda minus, contoh -450.000 / -Rp450.000. */
+const signed = (n, rp = false) => `${n < 0 ? '-' : ''}${rp ? 'Rp' : ''}${num(n)}`;
 
 export async function buildPdf(state) {
   const { jsPDF } = window.jspdf;
@@ -115,7 +115,7 @@ export async function buildPdf(state) {
     font('PlexMono', 'normal', 9);
     text(d ? num(e.amount) : '-', at(3), base, { align: 'right' });
     text(d ? '-' : num(e.amount), at(4), base, { align: 'right' });
-    text(acc(saldo), at(5), base, { align: 'right' });
+    text(signed(saldo), at(5), base, { align: 'right' });
     y += h;
     if (idx < state.entries.length - 1) { doc.setDrawColor(...LIGHT); doc.setLineWidth(0.2); doc.line(M, y, W - M, y); }
   });
@@ -132,7 +132,7 @@ export async function buildPdf(state) {
   sumRow('Total Debit (dana masuk)', 'Rp' + num(td)); y += 6;
   sumRow('Total Kredit (pengeluaran)', 'Rp' + num(tc)); y += 3.2;
   rule(y, 0.5, sx, ex); y += 5.6;
-  sumRow('Saldo Akhir', acc(saldo, true), true); y += 7;
+  sumRow('Saldo Akhir', signed(saldo, true), true); y += 7;
 
   // Terbilang + catatan
   const terb = `${saldo < 0 ? 'Minus ' : ''}${terbilang(Math.abs(saldo))} Rupiah`;
