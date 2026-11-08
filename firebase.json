@@ -4,6 +4,7 @@
     "ignore": [
       "firebase.json",
       ".firebaserc",
+      "firebase-debug*.log",
       "**/.*",
       "**/node_modules/**",
       "README.md",
@@ -12,7 +13,15 @@
     "cleanUrls": true,
     "headers": [
       {
-        "source": "assets/**",
+        "source": "**/*.@(html|js|css)",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "assets/@(img|fonts|vendor)/**",
         "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
       }
     ]
