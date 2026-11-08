@@ -15,7 +15,7 @@
   color: var(--ink);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); line-height: 1.5; }
+body { margin: 0; background: var(--bg); line-height: 1.5; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 [hidden] { display: none !important; }
 a { color: var(--blue); }
 .wrap { width: 100%; max-width: 980px; margin: 0 auto; padding: 0 16px; }
@@ -46,7 +46,7 @@ a { color: var(--blue); }
 .btn-glass:hover { background: rgba(255, 255, 255, .25); }
 
 /* Cards */
-.main { margin-top: -40px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 18px; padding-bottom: 40px; }
+.main { flex: 1 0 auto; margin-top: -40px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 18px; padding-bottom: 40px; }
 .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: 0 10px 30px -18px rgba(15, 23, 42, .35); }
 .card-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
 .card-head h2 { margin: 0; font-size: 18px; }
@@ -139,9 +139,10 @@ input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rg
 .info h2 { margin: 0 0 8px; font-size: 18px; }
 .info ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
 .info p { margin: 0; font-size: 14px; }
-.footer { padding: 24px 0 36px; color: var(--muted); font-size: 13px; text-align: center; }
+.footer { padding: 56px 0 calc(32px + env(safe-area-inset-bottom)); color: var(--muted); font-size: 13px; text-align: center; }
 .footer p { margin: 0; }
 .footer p + p { margin-top: 6px; }
+@media (max-width: 640px) { .footer { padding-top: 88px; font-size: 12.5px; } }
 
 /* Dialog */
 .dialog { border: 0; border-radius: 20px; padding: 0; width: min(560px, calc(100% - 24px)); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .4); }

@@ -55,7 +55,7 @@ export async function buildPdf(state) {
     doc.addImage(state.logo.src, 'PNG', W - M - lw, y - 3, lw, lh);
   }
   font('Plex', 'normal', 7.5); color(GRAY);
-  doc.setCharSpace(0.9); text('LAPORAN PERTANGGUNGJAWABAN', tx, y); doc.setCharSpace(0);
+  doc.setCharSpace(0.9); text('LAPORAN PERTANGGUNGJAWABAN ANGGARAN', tx, y); doc.setCharSpace(0);
   font('Plex', 'bold', 17); color(INK);
   const title = doc.splitTextToSize(state.title || 'Laporan Pertanggungjawaban', CW - (state.logo ? 34 : 0));
   text(title, tx, y + 8.5);
