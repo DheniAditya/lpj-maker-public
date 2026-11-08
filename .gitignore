@@ -1,0 +1,5 @@
+# Firebase CLI (lokal)
+firebase-debug.log
+firebase-debug.*.log
+.firebase/
+.firebaserc
